@@ -5,11 +5,12 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:poc_pdf_creation/core/date_time.dart';
 import 'package:poc_pdf_creation/curriculum/index.dart';
-import 'package:poc_pdf_creation/models/address.dart';
 import 'package:printing/printing.dart';
 
 class CurriculumPDFPage extends StatefulWidget {
-  const CurriculumPDFPage({super.key});
+  const CurriculumPDFPage({super.key, required this.curriculum});
+
+  final Curriculum curriculum;
 
   @override
   State<CurriculumPDFPage> createState() => _CurriculumPDFPageState();
@@ -24,111 +25,8 @@ class _CurriculumPDFPageState extends State<CurriculumPDFPage> {
   late final pw.TextStyle sectionTitleStyle;
   late final pw.TextStyle subSectionTitleStyle;
   late final pw.TextStyle bodyItalicStyle;
-  late Curriculum curriculum;
 
   bool isLoaded = false;
-
-  @override
-  void initState() {
-    super.initState();
-
-    final now = DateTime.now();
-
-    curriculum = Curriculum(
-      uid: 'uid',
-      userUID: 'userUID',
-      name: 'José Wanderson da Silva',
-      cpf: '921.919.812-01',
-      nascimento: '27/02/1994',
-      civilState: CivilState.divorciado,
-      sex: Sex.ratherNotSay,
-      country: 'Brazil',
-      qtdFilhos: 0,
-      cnh: Cnh.ab,
-      veiculoProprio: true,
-      disponibilidadeParaViagem: true,
-      disponibilidadeParaMudanca: true,
-      phone: '+55 (68) 99933-9999',
-      email: 'meuemail@email.com',
-      address: const Address(
-        cep: '69921-000',
-        address: 'address',
-        addressNumber: 123,
-        neighborhood: 'Neighborhood',
-        city: 'Campo Grande',
-        state: 'Mato Grosso do Sul',
-      ),
-      desiredPosition: 'Senior FullStack Developer',
-      professionalObjectives:
-          'I want this, that, those, etc asldkja sldkja skldjalk sjdlka jslka professionalObjectives',
-      academicFormation: <AcademicFormation>[
-        AcademicFormation(
-          courseName: 'Analista de Sistemas de Informação',
-          organization: 'Universidade Federal do Acre - UFAC',
-          situation: AcademicSituation.finished,
-          formation: Formation.graduation,
-          endDate: DateTime(2017, 02),
-        ),
-      ],
-      professionalExperience: <ProfessionalExperience>[
-        ProfessionalExperience(
-          company: 'Vizo',
-          context: 'Worked as Freelancer',
-          isAtual: false,
-          position: 'Flutter Developer',
-          responsability:
-              """• Led user interface iterations based on user feedback to ensure user-friendly experience.
-
-• Spearheaded development of core functionalities essential for mobile applications, including user authentication, notification system, and location- based features.
-
-• Implemented robust CI/CD pipeline for automated testing and streamlined deployment across environments.
-
-• Leveraging skills, also developed mobile app functionalities for US-based client (location-based event-sharing app) during my time at Shaw and Partners. 
-
-• Continuously updated skills through training courses, workshops, and self-study, staying current on industry trends and emerging technologies.""",
-          startDate: DateTime(2022, 07),
-          lastSalary: 4200,
-        ),
-        ProfessionalExperience(
-          company: 'Google Inc.',
-          context:
-              'I\'m currently working on IAs products, developing new features and fixing bugs',
-          position: 'Senior FullStack Python Developer',
-          responsability:
-              """• Developed cross-platform mobile application prototype (MVP) using Flutter and implemented Bloc for state management.
-
-• Utilized Get_it to inject dependencies and used Mockito and Flutter_test, for Unit, Widget and integration tests.
-
-• Led user interface iterations based on user feedback to ensure user-friendly experience.
-
-• Spearheaded development of core functionalities essential for mobile applications, including user authentication, notification system, and location- based features.
-
-• Implemented robust CI/CD pipeline for automated testing and streamlined deployment across environments.
-
-• Leveraging skills, also developed mobile app functionalities for US-based client (location-based event-sharing app) during my time at Shaw and Partners.
-
-• Continuously updated skills through training courses, workshops, and self-study, staying current on industry trends and emerging technologies.
-
-• Reduced development time by creating reusable code libraries for future projects.""",
-          startDate: now,
-          isAtual: true,
-        ),
-      ],
-      courses: <Course>[
-        Course(
-          name:
-              'AMAZON CERTIFIED DEVOPS DEVELOPER (ECS, EEKS, ESE, RDB, LAMBDA)',
-          organization: 'AMAZON AWS',
-          endDate: DateTime(2023, 02),
-        ),
-        Course(
-          name: 'Guia definitivo do DEVOPS (2024)',
-          organization: 'UDEMY - by COD3R',
-          endDate: now,
-        ),
-      ],
-    );
-  }
 
   Future<void> _loadData() async {
     if (isLoaded) return;
@@ -152,18 +50,18 @@ class _CurriculumPDFPageState extends State<CurriculumPDFPage> {
     ]);
 
     sectionTitleStyle = pw.TextStyle(
-      font: bold,
-      fontSize: 16,
-    );
-
-    subSectionTitleStyle = pw.TextStyle(
       font: regular,
       fontSize: 14,
     );
 
+    subSectionTitleStyle = pw.TextStyle(
+      font: regular,
+      fontSize: 12,
+    );
+
     bodyItalicStyle = pw.TextStyle(
       font: italic,
-      fontSize: 14,
+      fontSize: 12,
     );
 
     isLoaded = true;
@@ -178,6 +76,19 @@ class _CurriculumPDFPageState extends State<CurriculumPDFPage> {
     return doc.save();
   }
 
+  int calculateAge(DateTime birthDate) {
+    final now = DateTime.now();
+    final age = now.year - birthDate.year;
+
+    // Handle leap years and months
+    if (now.month < birthDate.month ||
+        (now.month == birthDate.month && now.day < birthDate.day)) {
+      return age - 1;
+    } else {
+      return age;
+    }
+  }
+
   void addData(pw.Document doc, Curriculum curriculum) {
     doc.addPage(
       pw.MultiPage(
@@ -188,9 +99,9 @@ class _CurriculumPDFPageState extends State<CurriculumPDFPage> {
         build: (context) {
           return [
             addProfileSection(curriculum),
+            addAcademicFormation(doc: doc, curriculum: curriculum),
             ...addProfessionalExperiences(doc: doc, curriculum: curriculum),
             addCourses(doc: doc, curriculum: curriculum),
-            addAcademicFormation(doc: doc, curriculum: curriculum),
           ];
         },
       ),
@@ -198,6 +109,8 @@ class _CurriculumPDFPageState extends State<CurriculumPDFPage> {
   }
 
   String get addressToBio {
+    final curriculum = widget.curriculum;
+
     final address = curriculum.address;
     final String state;
 
@@ -215,31 +128,73 @@ class _CurriculumPDFPageState extends State<CurriculumPDFPage> {
       crossAxisAlignment: pw.CrossAxisAlignment.stretch,
       children: [
         pw.Text(
-          curriculum.name,
+          widget.curriculum.name,
           textAlign: pw.TextAlign.center,
           style: pw.TextStyle(font: regular, fontSize: 30),
         ),
+        pw.Row(
+          mainAxisAlignment: pw.MainAxisAlignment.center,
+          children: [
+            pw.Text(
+              calculateAge(
+                CustomDateFormatter.brStringDateToDate(
+                  widget.curriculum.nascimento,
+                )!,
+              ).toString(),
+              textAlign: pw.TextAlign.center,
+              style: pw.TextStyle(font: regular, fontSize: 20),
+            ),
+            pw.SizedBox(width: 2),
+            pw.Text(
+              'anos',
+              textAlign: pw.TextAlign.center,
+              style: pw.TextStyle(font: regular, fontSize: 16),
+            ),
+          ],
+        ),
+        pw.Row(
+          mainAxisAlignment: pw.MainAxisAlignment.center,
+          children: [
+            if (curriculum.address.neighborhood != null)
+              pw.Text(
+                'Bairro ${curriculum.address.neighborhood!}',
+                textAlign: pw.TextAlign.center,
+                style: pw.TextStyle(font: regular, fontSize: 16),
+              ),
+            if (curriculum.address.state != null)
+              pw.Text(
+                ' - ${curriculum.address.state!}',
+                textAlign: pw.TextAlign.center,
+                style: pw.TextStyle(font: regular, fontSize: 16),
+              ),
+          ],
+        ),
         pw.Text(
-          curriculum.desiredPosition,
+          'Tel: ${curriculum.phone}',
           textAlign: pw.TextAlign.center,
           style: pw.TextStyle(font: regular, fontSize: 16),
         ),
-        pw.Divider(height: 32),
-        pw.Column(
-          children: [
-            iconWithText(
-              const pw.IconData(0xe0c8),
-              addressToBio,
-            ),
-            iconWithText(
-              const pw.IconData(0xe0b0),
-              curriculum.phone,
-            ),
-            iconWithText(
-              const pw.IconData(0xe158),
-              curriculum.email,
-            ),
-          ],
+        pw.Text(
+          'Email: ${curriculum.email}',
+          textAlign: pw.TextAlign.center,
+          style: pw.TextStyle(font: regular, fontSize: 16),
+        ),
+        if (curriculum.linkedin != null)
+          pw.Text(
+            'Linkedin: ${curriculum.linkedin}',
+            textAlign: pw.TextAlign.center,
+            style: pw.TextStyle(font: regular, fontSize: 16),
+          ),
+        pw.SizedBox(height: 24),
+        section(
+          title: 'Objetivo',
+          // icon: const pw.IconData(0xea23),
+          icon: const pw.IconData(0xe0e0),
+          child: pw.Text(
+            curriculum.professionalObjectives,
+            textAlign: pw.TextAlign.justify,
+            style: pw.TextStyle(font: regular, fontSize: 14),
+          ),
         ),
         pw.SizedBox(height: 12),
       ],
@@ -249,7 +204,7 @@ class _CurriculumPDFPageState extends State<CurriculumPDFPage> {
   pw.Widget section({
     required String title,
     required pw.Widget child,
-    required pw.IconData icon,
+    pw.IconData? icon,
   }) {
     return pw.Padding(
       padding: const pw.EdgeInsets.only(top: 8),
@@ -262,23 +217,25 @@ class _CurriculumPDFPageState extends State<CurriculumPDFPage> {
               children: [
                 pw.Row(
                   children: [
-                    pw.DecoratedBox(
-                      decoration: const pw.BoxDecoration(
-                        color: PdfColor(0.2, .2, .2),
-                      ),
-                      child: pw.Padding(
-                        padding: const pw.EdgeInsets.all(4),
-                        child: pw.Icon(
-                          icon,
-                          size: 16,
-                          color: const PdfColor(1, 1, 1),
-                          font: materialIconsFont,
+                    if (icon == null) pw.SizedBox.square(dimension: 20),
+                    if (icon != null)
+                      pw.DecoratedBox(
+                        decoration: const pw.BoxDecoration(
+                          color: PdfColor(0.2, .2, .2),
+                        ),
+                        child: pw.Padding(
+                          padding: const pw.EdgeInsets.all(4),
+                          child: pw.Icon(
+                            icon,
+                            size: 16,
+                            color: const PdfColor(1, 1, 1),
+                            font: materialIconsFont,
+                          ),
                         ),
                       ),
-                    ),
                     pw.SizedBox(width: 8),
                     pw.Text(
-                      title,
+                      title.toUpperCase(),
                       style: sectionTitleStyle,
                     ),
                   ],
@@ -379,22 +336,25 @@ class _CurriculumPDFPageState extends State<CurriculumPDFPage> {
     if (formation.isEmpty) return pw.SizedBox.shrink();
 
     return section(
-        title: 'Formação Acadêmica',
-        child: pw.Column(children: formation.map(academicFormation).toList()),
-        icon: const pw.IconData(0xe80c));
+      title: 'Formação Acadêmica',
+      child: pw.Column(children: formation.map(academicFormation).toList()),
+      icon: const pw.IconData(0xe80c),
+    );
   }
 
   pw.Widget experience(ProfessionalExperience e) {
     final titleTxtStyle = pw.TextStyle(
-      font: italic,
+      font: regular,
       fontSize: subSectionTitleStyle.fontSize!,
-      fontItalic: italic,
+      // fontItalic: italic,
     );
 
     final values = e.responsability.split('\n');
 
+    bool isFirstParagraph = true;
+
     return pw.Padding(
-      padding: const pw.EdgeInsets.only(top: 8, bottom: 16),
+      padding: const pw.EdgeInsets.only(top: 8, bottom: 8),
       child: pw.Column(
         crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: [
@@ -403,41 +363,69 @@ class _CurriculumPDFPageState extends State<CurriculumPDFPage> {
               pw.Expanded(
                 flex: 3,
                 child: pw.Text(
-                  e.position,
+                  e.company,
                   style: titleTxtStyle.copyWith(
                     fontWeight: pw.FontWeight.bold,
                     fontBold: bold,
                   ),
+                  textAlign: pw.TextAlign.start,
                 ),
               ),
               pw.Expanded(
-                flex: 2,
-                child: pw.Text(
-                  CustomDateFormatter.monthYearBrExtensive(e.startDate)!,
+                child: pw.RichText(
                   textAlign: pw.TextAlign.end,
-                  style: titleTxtStyle.copyWith(
-                    fontWeight: pw.FontWeight.bold,
-                    fontBold: bold,
+                  text: pw.TextSpan(
+                    text: CustomDateFormatter.dateToBarsMonthYear(e.startDate)!,
+                    style: subSectionTitleStyle,
+                    children: [
+                      if (e.endDate != null)
+                        pw.TextSpan(
+                          text:
+                              ' a ${CustomDateFormatter.dateToBarsMonthYear(e.endDate)!}',
+                          style: subSectionTitleStyle,
+                        ),
+                    ],
                   ),
                 ),
               ),
             ],
           ),
-          pw.Text(
-            e.company,
-            style: titleTxtStyle,
-            textAlign: pw.TextAlign.start,
+          pw.RichText(
+            text: pw.TextSpan(
+              text: 'Cargo:  ',
+              style: titleTxtStyle.copyWith(
+                fontWeight: pw.FontWeight.bold,
+                fontBold: bold,
+              ),
+              children: [
+                pw.TextSpan(
+                  text: e.position,
+                  style: titleTxtStyle.copyWith(
+                    fontWeight: pw.FontWeight.normal,
+                  ),
+                ),
+              ],
+            ),
           ),
           pw.SizedBox(height: 8),
-          ...values.map(
-            (e) => pw.Paragraph(
-              text: e,
+          ...values.map((e) {
+            String text;
+
+            if (isFirstParagraph) {
+              text = 'Atividades: $e';
+              isFirstParagraph = false;
+            } else {
+              text = e;
+            }
+
+            return pw.Paragraph(
+              text: text,
               style: subSectionTitleStyle,
               margin: const pw.EdgeInsets.only(bottom: 4),
               padding: pw.EdgeInsets.zero,
               textAlign: pw.TextAlign.justify,
-            ),
-          ),
+            );
+          }),
         ],
       ),
     );
@@ -450,7 +438,7 @@ class _CurriculumPDFPageState extends State<CurriculumPDFPage> {
       fontItalic: italic,
     );
     return pw.Padding(
-      padding: const pw.EdgeInsets.only(bottom: 12),
+      padding: const pw.EdgeInsets.only(bottom: 8),
       child: pw.Column(
         crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: [
@@ -493,49 +481,39 @@ class _CurriculumPDFPageState extends State<CurriculumPDFPage> {
   }
 
   pw.Widget academicFormation(AcademicFormation af) {
-    final titleTxtStyle = pw.TextStyle(
-      font: italic,
-      fontSize: subSectionTitleStyle.fontSize!,
-      fontItalic: italic,
-    );
     return pw.Padding(
-      padding: const pw.EdgeInsets.only(bottom: 12),
-      child: pw.Column(
+      padding: const pw.EdgeInsets.only(bottom: 8),
+      child: pw.Row(
         crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: [
-          pw.Row(
-            crossAxisAlignment: pw.CrossAxisAlignment.start,
-            children: [
-              pw.Expanded(
-                flex: 6,
-                child: pw.Text(
-                  af.courseName,
-                  style: sectionTitleStyle.copyWith(
-                    fontSize: sectionTitleStyle.fontSize! - 4,
-                  ),
-                ),
-              ),
-              pw.SizedBox(width: 8),
-              pw.Expanded(
-                flex: 3,
-                child: pw.Text(
-                  CustomDateFormatter.monthYearBrExtensive(af.endDate)!,
-                  textAlign: pw.TextAlign.end,
-                  style: subSectionTitleStyle.copyWith(
-                    fontSize: subSectionTitleStyle.fontSize! - 4,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          pw.SizedBox(height: 4),
-          pw.Text(
-            af.organization,
-            textAlign: pw.TextAlign.start,
-            style: titleTxtStyle.copyWith(
-              fontSize: titleTxtStyle.fontSize! - 4,
+          pw.Expanded(
+            flex: 5,
+            child: pw.Text(
+              af.courseName,
+              style: subSectionTitleStyle,
+              textAlign: pw.TextAlign.start,
             ),
           ),
+          pw.SizedBox(width: 4),
+          pw.Expanded(
+            flex: 7,
+            child: pw.Text(
+              af.organization,
+              textAlign: pw.TextAlign.start,
+              style: subSectionTitleStyle,
+            ),
+          ),
+          pw.Padding(
+            padding: const pw.EdgeInsets.only(left: 8),
+            child: pw.SizedBox(
+              width: 94,
+              child: pw.Text(
+                af.endDate == null ? '' : 'Conclusão: ${af.endDate!.year}',
+                textAlign: pw.TextAlign.center,
+                style: subSectionTitleStyle,
+              ),
+            ),
+          )
         ],
       ),
     );
@@ -545,11 +523,19 @@ class _CurriculumPDFPageState extends State<CurriculumPDFPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: PdfPreview(
+        useActions: true,
+        actions: [
+          ElevatedButton(
+            onPressed: Navigator.of(context).pop,
+            child: const Text('Voltar'),
+          ),
+        ],
+        canDebug: false,
         loadingWidget: const Center(
           child: CircularProgressIndicator(),
         ),
         build: (_) {
-          return _generatePdf(curriculum);
+          return _generatePdf(widget.curriculum);
         },
       ),
     );
