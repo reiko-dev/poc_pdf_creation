@@ -99,9 +99,10 @@ class _CurriculumPDFPageState extends State<CurriculumPDFPage> {
         build: (context) {
           return [
             addProfileSection(curriculum),
-            addAcademicFormation(doc: doc, curriculum: curriculum),
-            ...addProfessionalExperiences(doc: doc, curriculum: curriculum),
-            addCourses(doc: doc, curriculum: curriculum),
+            addAcademicFormation(curriculum),
+            ...addProfessionalExperiences(curriculum),
+            addCourses(curriculum),
+            addMoreInfo(curriculum),
           ];
         },
       ),
@@ -180,10 +181,13 @@ class _CurriculumPDFPageState extends State<CurriculumPDFPage> {
           style: pw.TextStyle(font: regular, fontSize: 16),
         ),
         if (curriculum.linkedin != null)
-          pw.Text(
-            'Linkedin: ${curriculum.linkedin}',
-            textAlign: pw.TextAlign.center,
-            style: pw.TextStyle(font: regular, fontSize: 16),
+          pw.Link(
+            destination: curriculum.linkedin!,
+            child: pw.Text(
+              'Linkedin: ${curriculum.linkedin}',
+              textAlign: pw.TextAlign.center,
+              style: pw.TextStyle(font: regular, fontSize: 16),
+            ),
           ),
         pw.SizedBox(height: 24),
         section(
@@ -283,10 +287,7 @@ class _CurriculumPDFPageState extends State<CurriculumPDFPage> {
     );
   }
 
-  List<pw.Widget> addProfessionalExperiences({
-    required pw.Document doc,
-    required Curriculum curriculum,
-  }) {
+  List<pw.Widget> addProfessionalExperiences(Curriculum curriculum) {
     final experiences = curriculum.professionalExperience;
 
     if (experiences.isEmpty) return [];
@@ -312,10 +313,7 @@ class _CurriculumPDFPageState extends State<CurriculumPDFPage> {
     return list;
   }
 
-  pw.Widget addCourses({
-    required pw.Document doc,
-    required Curriculum curriculum,
-  }) {
+  pw.Widget addCourses(Curriculum curriculum) {
     final courses = curriculum.courses;
 
     if (courses.isEmpty) return pw.SizedBox.shrink();
@@ -327,10 +325,7 @@ class _CurriculumPDFPageState extends State<CurriculumPDFPage> {
     );
   }
 
-  pw.Widget addAcademicFormation({
-    required pw.Document doc,
-    required Curriculum curriculum,
-  }) {
+  pw.Widget addAcademicFormation(Curriculum curriculum) {
     final formation = curriculum.academicFormation;
 
     if (formation.isEmpty) return pw.SizedBox.shrink();
@@ -339,6 +334,68 @@ class _CurriculumPDFPageState extends State<CurriculumPDFPage> {
       title: 'Formação Acadêmica',
       child: pw.Column(children: formation.map(academicFormation).toList()),
       icon: const pw.IconData(0xe80c),
+    );
+  }
+
+  pw.Widget addMoreInfo(Curriculum curriculum) {
+    final canTravel = curriculum.disponibilidadeParaViagem;
+    final canChangePlace = curriculum.disponibilidadeParaMudanca;
+    final bool hasDisability;
+    if (curriculum.disability == null || curriculum.disability!.isEmpty) {
+      hasDisability = false;
+    } else {
+      hasDisability = true;
+    }
+
+    const txtPadding = pw.EdgeInsets.only(bottom: 8);
+
+    return section(
+      title: 'Outras informações',
+      icon: const pw.IconData(0xe0e0),
+      child: pw.Column(
+        mainAxisAlignment: pw.MainAxisAlignment.start,
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
+        children: [
+          if (curriculum.cnh != Cnh.nao)
+            pw.Padding(
+              padding: txtPadding,
+              child: pw.Text(
+                'CNH: ${curriculum.cnh.label}',
+                style: sectionTitleStyle,
+              ),
+            ),
+          pw.Padding(
+            padding: txtPadding,
+            child: pw.Text(
+              '•  ${canChangePlace ? 'Disponibilidade para viajar' : 'Não tem disponibilidade para viajar'}',
+              style: sectionTitleStyle,
+            ),
+          ),
+          pw.Padding(
+            padding: txtPadding,
+            child: pw.Text(
+              '•  ${canTravel ? 'Disponibilidade para mudança' : 'Não tem disponibilidade para mudar de cidade'}',
+              style: sectionTitleStyle,
+            ),
+          ),
+          if (hasDisability)
+            pw.Padding(
+              padding: txtPadding,
+              child: pw.Text(
+                '•  ${curriculum.disability!}',
+                style: sectionTitleStyle,
+              ),
+            ),
+          if (curriculum.englishLevel != null)
+            pw.Padding(
+              padding: txtPadding,
+              child: pw.Text(
+                '•  Inglês ${curriculum.englishLevel!.label}',
+                style: sectionTitleStyle,
+              ),
+            ),
+        ],
+      ),
     );
   }
 
@@ -351,7 +408,14 @@ class _CurriculumPDFPageState extends State<CurriculumPDFPage> {
 
     final values = e.responsability.split('\n');
 
-    bool isFirstParagraph = true;
+    final style = titleTxtStyle.copyWith(
+      fontWeight: pw.FontWeight.normal,
+    );
+    final List<pw.InlineSpan> texts = [
+      ...values.map(
+        (e) => pw.TextSpan(text: '$e\n', style: style),
+      ),
+    ];
 
     return pw.Padding(
       padding: const pw.EdgeInsets.only(top: 8, bottom: 8),
@@ -408,24 +472,16 @@ class _CurriculumPDFPageState extends State<CurriculumPDFPage> {
             ),
           ),
           pw.SizedBox(height: 8),
-          ...values.map((e) {
-            String text;
-
-            if (isFirstParagraph) {
-              text = 'Atividades: $e';
-              isFirstParagraph = false;
-            } else {
-              text = e;
-            }
-
-            return pw.Paragraph(
-              text: text,
-              style: subSectionTitleStyle,
-              margin: const pw.EdgeInsets.only(bottom: 4),
-              padding: pw.EdgeInsets.zero,
-              textAlign: pw.TextAlign.justify,
-            );
-          }),
+          pw.RichText(
+            text: pw.TextSpan(
+              text: 'Atividades: ',
+              style: titleTxtStyle.copyWith(
+                fontWeight: pw.FontWeight.bold,
+                fontBold: bold,
+              ),
+              children: texts,
+            ),
+          ),
         ],
       ),
     );
@@ -433,46 +489,30 @@ class _CurriculumPDFPageState extends State<CurriculumPDFPage> {
 
   pw.Widget course(Course e) {
     final titleTxtStyle = pw.TextStyle(
-      font: italic,
+      font: regular,
       fontSize: subSectionTitleStyle.fontSize!,
-      fontItalic: italic,
     );
     return pw.Padding(
       padding: const pw.EdgeInsets.only(bottom: 8),
-      child: pw.Column(
+      child: pw.Row(
         crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: [
-          pw.Row(
-            crossAxisAlignment: pw.CrossAxisAlignment.start,
-            children: [
-              pw.Expanded(
-                flex: 6,
-                child: pw.Text(
-                  e.name,
-                  style: sectionTitleStyle.copyWith(
-                    fontSize: sectionTitleStyle.fontSize! - 4,
-                  ),
-                ),
-              ),
-              pw.SizedBox(width: 8),
-              pw.Expanded(
-                flex: 3,
-                child: pw.Text(
-                  CustomDateFormatter.monthYearBrExtensive(e.endDate)!,
-                  textAlign: pw.TextAlign.end,
-                  style: subSectionTitleStyle.copyWith(
-                    fontSize: subSectionTitleStyle.fontSize! - 4,
-                  ),
-                ),
-              ),
-            ],
+          pw.Expanded(
+            flex: 5,
+            child: pw.Text(e.name, style: titleTxtStyle),
           ),
           pw.SizedBox(height: 4),
-          pw.Text(
-            e.organization,
-            textAlign: pw.TextAlign.start,
-            style: titleTxtStyle.copyWith(
-              fontSize: titleTxtStyle.fontSize! - 4,
+          pw.Expanded(
+            flex: 7,
+            child: pw.Text(e.organization, style: titleTxtStyle),
+          ),
+          pw.SizedBox(width: 4),
+          pw.SizedBox(
+            width: 34,
+            child: pw.Text(
+              e.endDate.year.toString(),
+              textAlign: pw.TextAlign.end,
+              style: subSectionTitleStyle,
             ),
           ),
         ],

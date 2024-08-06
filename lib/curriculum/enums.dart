@@ -206,3 +206,19 @@ enum BrazilState {
         _ => null,
       };
 }
+
+enum EnglishLevel {
+  beginner('Iniciante'),
+  basic('Básico'),
+  intermediate('Intermediário'),
+  advanced('Avançado'),
+  fluent('Fluente');
+
+  const EnglishLevel(this.label);
+
+  final String label;
+
+  factory EnglishLevel.fromName(String text) {
+    return values.firstWhere((element) => element.label == text);
+  }
+}

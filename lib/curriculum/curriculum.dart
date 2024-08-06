@@ -33,6 +33,7 @@ class Curriculum {
   final List<ProfessionalExperience> professionalExperience;
   final List<Course> courses;
   final String userUID;
+  final EnglishLevel? englishLevel;
 
   Curriculum({
     required this.name,
@@ -62,43 +63,44 @@ class Curriculum {
     required this.courses,
     required this.userUID,
     required this.uid,
+    this.englishLevel,
   });
 
-  Curriculum copyWith({
-    String? name,
-    String? cpf,
-    String? nascimento,
-    CivilState? civilState,
-    Sex? sex,
-    String? country,
-    int? qtdFilhos,
-    Cnh? cnh,
-    bool? veiculoProprio,
-    bool? disponibilidadeParaViagem,
-    bool? disponibilidadeParaMudanca,
-    String? disability,
-    String? phone,
-    String? phone2,
-    String? email,
-    String? linkedin,
-    String? facebook,
-    String? instagram,
-    String? cep,
-    Address? address,
-    int? addressNumber,
-    String? complement,
-    String? neighborhood,
-    String? city,
-    String? state,
-    String? desiredPosition,
-    double? salaryPretension,
-    String? professionalObjectives,
-    List<AcademicFormation>? academicFormation,
-    List<ProfessionalExperience>? professionalExperience,
-    List<Course>? courses,
-    String? userUID,
-    String? uid,
-  }) {
+  Curriculum copyWith(
+      {String? name,
+      String? cpf,
+      String? nascimento,
+      CivilState? civilState,
+      Sex? sex,
+      String? country,
+      int? qtdFilhos,
+      Cnh? cnh,
+      bool? veiculoProprio,
+      bool? disponibilidadeParaViagem,
+      bool? disponibilidadeParaMudanca,
+      String? disability,
+      String? phone,
+      String? phone2,
+      String? email,
+      String? linkedin,
+      String? facebook,
+      String? instagram,
+      String? cep,
+      Address? address,
+      int? addressNumber,
+      String? complement,
+      String? neighborhood,
+      String? city,
+      String? state,
+      String? desiredPosition,
+      double? salaryPretension,
+      String? professionalObjectives,
+      List<AcademicFormation>? academicFormation,
+      List<ProfessionalExperience>? professionalExperience,
+      List<Course>? courses,
+      String? userUID,
+      String? uid,
+      EnglishLevel? englishLevel}) {
     return Curriculum(
       name: name ?? this.name,
       cpf: cpf ?? this.cpf,
@@ -131,6 +133,7 @@ class Curriculum {
       courses: courses ?? this.courses,
       userUID: userUID ?? this.userUID,
       uid: uid ?? this.uid,
+      englishLevel: englishLevel ?? this.englishLevel,
     );
   }
 
@@ -164,6 +167,7 @@ class Curriculum {
       'courses': courses.map((x) => x.toMap()).toList(),
       'userUID': userUID,
       'uid': uid,
+      'englishLevel': englishLevel?.name,
     };
   }
 
@@ -211,6 +215,9 @@ class Curriculum {
           (x) => Course.fromMap(x as Map<String, dynamic>),
         ),
       ),
+      englishLevel: map['englishLevel'] != null
+          ? EnglishLevel.fromName(map['englishLevel'])
+          : null,
     );
   }
 
@@ -221,7 +228,7 @@ class Curriculum {
 
   @override
   String toString() {
-    return 'Curriculum(uid: $uid, nome: $name, cpf: $cpf, nascimento: $nascimento, civilState: $civilState, sex: $sex, country: $country, qtdFilhos: $qtdFilhos, cnh: $cnh, veiculoProprio: $veiculoProprio, disponibilidadeParaViagem: $disponibilidadeParaViagem, disponibilidadeParaMudanca: $disponibilidadeParaMudanca, deficiencia: $disability, phone: $phone, phone2: $phone2, email: $email, linkedin: $linkedin, facebook: $facebook, instagram: $instagram, address: $address, desiredPosition: $desiredPosition, salaryPretension: $salaryPretension, professionalObjectives: $professionalObjectives, academicFormation: $academicFormation, professionalExperience: $professionalExperience, courses: $courses, userUID: $userUID)';
+    return 'Curriculum(uid: $uid, nome: $name, cpf: $cpf, nascimento: $nascimento, civilState: $civilState, sex: $sex, country: $country, qtdFilhos: $qtdFilhos, cnh: $cnh, veiculoProprio: $veiculoProprio, disponibilidadeParaViagem: $disponibilidadeParaViagem, disponibilidadeParaMudanca: $disponibilidadeParaMudanca, deficiencia: $disability, phone: $phone, phone2: $phone2, email: $email, linkedin: $linkedin, facebook: $facebook, instagram: $instagram, address: $address, desiredPosition: $desiredPosition, salaryPretension: $salaryPretension, professionalObjectives: $professionalObjectives, academicFormation: $academicFormation, professionalExperience: $professionalExperience, courses: $courses, userUID: $userUID, englishLevel: ${englishLevel?.name})';
   }
 
   @override
@@ -252,6 +259,7 @@ class Curriculum {
         other.salaryPretension == salaryPretension &&
         other.userUID == userUID &&
         other.professionalObjectives == professionalObjectives &&
+        other.englishLevel == englishLevel &&
         listEquals(other.academicFormation, academicFormation) &&
         listEquals(other.professionalExperience, professionalExperience) &&
         listEquals(other.courses, courses);
@@ -285,6 +293,7 @@ class Curriculum {
         academicFormation.hashCode ^
         professionalExperience.hashCode ^
         courses.hashCode ^
-        userUID.hashCode;
+        userUID.hashCode ^
+        englishLevel.hashCode;
   }
 }

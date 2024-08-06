@@ -62,6 +62,8 @@ class _MyAppState extends State<MyApp> {
             complement: 'Em frente à Igreja Católica',
           ),
           desiredPosition: 'Desenvolvedor Fullstack',
+          disability: 'Possuo deficiência visual',
+          englishLevel: EnglishLevel.advanced,
           professionalObjectives:
               'Flutter Development Expert with one and a half years of experience building high-quality mobile applications. Proven ability to collaborate effectively and deliver projects on time, particularly within a US work environment. Possess strong UI/UX design skills and a passion for creating user-friendly experiences.',
           academicFormation: [
@@ -81,6 +83,15 @@ class _MyAppState extends State<MyApp> {
             ),
           ],
           professionalExperience: [
+            ProfessionalExperience(
+              company: 'Consultório do Dr. Antônio Claret Resende de Freitas',
+              context: 'Software Development Company',
+              position: 'Recepcionista',
+              responsability:
+                  """Recepção de clientes, agendamento de consultas, organização das fichas de pacientes e arquivo, serviços bancários, esterilização dos materiais e equipamentos, auxílio nas cirurgias dentárias.""",
+              startDate: DateTime(2022, 07),
+              isAtual: true,
+            ),
             ProfessionalExperience(
               company: 'Shaw and Partners',
               context: 'Software Development Company',
@@ -114,7 +125,18 @@ Developed a cross-platform mobile application using Flutter (iOS, Android, Web) 
   • Demonstrated strong collaboration and project management skills, effectively working within a team environment""",
             ),
           ],
-          courses: [],
+          courses: [
+            Course(
+              name: 'Curso de Técnico de Informática',
+              organization: 'SENAC',
+              endDate: DateTime(2010, 08, 02),
+            ),
+            Course(
+              name: 'Falar em público',
+              organization: 'Curso a distância Nube',
+              endDate: DateTime(2019),
+            ),
+          ],
           userUID: 'userUID',
         ),
       ),
