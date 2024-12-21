@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:poc_pdf_creation/curriculum/index.dart';
-import 'package:poc_pdf_creation/job_apply_report/job_apply_report.dart';
+import 'package:poc_pdf_creation/job_apply/job_apply.dart';
+import 'package:poc_pdf_creation/job_apply/job_apply_report.dart';
+import 'package:poc_pdf_creation/job_apply/job_apply_status/index.dart';
+import 'package:poc_pdf_creation/job_apply/random.dart';
+import 'package:poc_pdf_creation/job_apply/user_job_application.dart';
 import 'package:poc_pdf_creation/job_apply_report_pdf_page.dart';
 import 'package:poc_pdf_creation/models/index.dart';
 
@@ -37,10 +41,30 @@ class _MyAppState extends State<MyApp> {
         useMaterial3: true,
       ),
       home: JobApplyPDFPage(
-        report: JobApplyReport(
-          description: 'My description',
-          status: SuitableStatus.suitable,
-          interviewDate: DateTime.now(),
+        report: UserJobApplication(
+          apply: JobApply(
+            uid: 'uid',
+            createdAt: DateTime.now(),
+            userId: 'userId',
+            jobId: 'jobId',
+            curriculumId: 'curriculumId',
+            analystId: 'analystId',
+            statusList: [
+              JASInitiated(
+                userWhoRegisteredEvent: Fake.createFakeUser(),
+                eventDate: DateTime.now(),
+              ),
+            ],
+            report: JobApplyReport(
+              description: 'My description',
+              status: SuitableStatus.suitable,
+              interviewDate: DateTime.now(),
+            ),
+          ),
+          job: Fake.createFakeJob(
+            company: Fake.createFakeCompany(),
+            job: Fake.createFakeJobName(),
+          ),
         ),
       ),
     );

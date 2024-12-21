@@ -3,13 +3,13 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
-import 'package:poc_pdf_creation/job_apply_report/job_apply_report.dart';
+import 'package:poc_pdf_creation/job_apply/user_job_application.dart';
 import 'package:printing/printing.dart';
 
 class JobApplyPDFPage extends StatefulWidget {
   const JobApplyPDFPage({super.key, required this.report});
 
-  final JobApplyReport report;
+  final UserJobApplication report;
 
   @override
   State<JobApplyPDFPage> createState() => _JobApplyPDFPageState();
@@ -24,6 +24,7 @@ class _JobApplyPDFPageState extends State<JobApplyPDFPage> {
   late final pw.TextStyle sectionTitleStyle;
   late final pw.TextStyle subSectionTitleStyle;
   late final pw.TextStyle bodyItalicStyle;
+  late final pw.TextStyle bodyBoldtyle;
 
   bool isLoaded = false;
 
@@ -63,10 +64,15 @@ class _JobApplyPDFPageState extends State<JobApplyPDFPage> {
       fontSize: 12,
     );
 
+    bodyBoldtyle = pw.TextStyle(
+      font: bold,
+      fontSize: 12,
+    );
+
     isLoaded = true;
   }
 
-  Future<Uint8List> _generatePdf(JobApplyReport jobApplyReport) async {
+  Future<Uint8List> _generatePdf(UserJobApplication jobApplyReport) async {
     await _loadData();
     final doc = pw.Document();
 
@@ -88,7 +94,7 @@ class _JobApplyPDFPageState extends State<JobApplyPDFPage> {
     }
   }
 
-  void addData(pw.Document doc, JobApplyReport jobApplyReport) {
+  void addData(pw.Document doc, UserJobApplication report) {
     doc.addPage(
       pw.MultiPage(
         maxPages: 50,
@@ -97,63 +103,39 @@ class _JobApplyPDFPageState extends State<JobApplyPDFPage> {
         mainAxisAlignment: pw.MainAxisAlignment.start,
         build: (context) {
           return [
-            section(
-              title: 'title',
-              child: iconWithText(Icons.car_crash, 'Text'),
-            ),
+            section(report: report),
           ];
         },
       ),
     );
   }
 
-  pw.Widget section({
-    required String title,
-    required pw.Widget child,
-    pw.IconData? icon,
-  }) {
+  pw.Widget section({required UserJobApplication report}) {
     return pw.Padding(
       padding: const pw.EdgeInsets.only(top: 8),
       child: pw.Column(
-        crossAxisAlignment: pw.CrossAxisAlignment.start,
+        crossAxisAlignment: pw.CrossAxisAlignment.stretch,
         children: [
-          pw.Padding(
-            padding: const pw.EdgeInsets.only(bottom: 8),
-            child: pw.Column(
-              children: [
-                pw.Row(
-                  children: [
-                    if (icon == null) pw.SizedBox.square(dimension: 20),
-                    if (icon != null)
-                      pw.DecoratedBox(
-                        decoration: const pw.BoxDecoration(
-                          color: PdfColor(0.2, .2, .2),
-                        ),
-                        child: pw.Padding(
-                          padding: const pw.EdgeInsets.all(4),
-                          child: pw.Icon(
-                            icon,
-                            size: 16,
-                            color: const PdfColor(1, 1, 1),
-                            font: materialIconsFont,
-                          ),
-                        ),
-                      ),
-                    pw.SizedBox(width: 8),
-                    pw.Text(
-                      title.toUpperCase(),
-                      style: sectionTitleStyle,
-                    ),
-                  ],
-                ),
-                pw.Divider(height: 0),
-              ],
+          pw.Text(
+            'Parecer da entrevista'.toUpperCase(),
+            textAlign: pw.TextAlign.center,
+            style: bodyBoldtyle.copyWith(
+              fontSize: 16,
             ),
           ),
-          child,
+          pw.Table(
+            children: [getTableRow('Empresa', report.job.company.name!)],
+          ),
         ],
       ),
     );
+  }
+
+  pw.TableRow getTableRow(String key, String value, [bool upperCase = true]) {
+    return pw.TableRow(children: [
+      pw.Text(upperCase ? key.toUpperCase() : key),
+      pw.Text(upperCase ? value.toUpperCase() : value),
+    ]);
   }
 
   pw.Widget iconWithText(

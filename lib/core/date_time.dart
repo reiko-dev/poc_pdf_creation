@@ -11,6 +11,14 @@ class CustomDateFormatter {
     return DateFormat.yMMMMd('pt_BR').format(dateTime);
   }
 
+  /// Output: 26 de Junho de 2026
+  static String? dateToBrExtensiveWithHour(DateTime? dateTime) {
+    if (dateTime == null) return null;
+
+    return DateFormat("d 'de' MMMM 'de' y, à's' HH:mm", 'pt_BR')
+        .format(dateTime);
+  }
+
   /// Output: Junho de 2026
   static String? monthYearBrExtensive(DateTime? dateTime) {
     if (dateTime == null) return null;
@@ -22,13 +30,6 @@ class CustomDateFormatter {
     if (dateTime == null) return null;
 
     return DateFormat('dd/MM/yyyy').format(dateTime);
-  }
-
-  ///Output: 06/2026
-  static String? dateToBarsMonthYear(DateTime? dateTime) {
-    if (dateTime == null) return null;
-
-    return DateFormat('MM/yyyy').format(dateTime);
   }
 
   static String? dateToBrExtensiveMonthYear(DateTime? dateTime) {
@@ -67,11 +68,7 @@ class CustomDateFormatter {
   final dateFormat = DateFormat("dd/MM/yyyy");
 
   static DateTime? brStringDateToDate(String? date) {
-    if (date == null || date.length < 8) return null;
-
-    if (date.length > 8) {
-      date = date.split('/').join();
-    }
+    if (date == null || date.length != 8) return null;
 
     final dd = date.substring(0, 2);
     final mm = date.substring(2, 4);
@@ -138,5 +135,11 @@ class CustomDateFormatter {
 
     // Sort by year in descending order (biggest to smallest)
     return b!.compareTo(a!);
+  }
+
+  static String? dateToBarsMonthYear(DateTime? dateTime) {
+    if (dateTime == null) return null;
+
+    return DateFormat('MM/yyyy').format(dateTime);
   }
 }

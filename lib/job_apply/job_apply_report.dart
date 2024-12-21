@@ -1,9 +1,6 @@
 import 'dart:convert';
 
-abstract class Labeled {
-  const Labeled();
-  String get label;
-}
+import 'package:poc_pdf_creation/job_apply/mixins.dart';
 
 enum SuitableStatus implements Labeled {
   suitable('Apto', 'suitable'),
