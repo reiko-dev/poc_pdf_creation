@@ -129,6 +129,7 @@ class _JobApplyPDFPageState extends State<JobApplyPDFPage> {
   }
 
   pw.Widget firstSection({required UserJobApplication report}) {
+    final space = pw.SizedBox(height: 6);
     return pw.Padding(
       padding: const pw.EdgeInsets.only(top: 8),
       child: pw.Column(
@@ -157,7 +158,7 @@ class _JobApplyPDFPageState extends State<JobApplyPDFPage> {
                   CustomDateFormatter.dateToBrExtensive(report.apply.createdAt)!
                 ),
               ]),
-              pw.TableRow(children: [pw.SizedBox(height: 12)]),
+              pw.TableRow(children: [space]),
               getTableRow([
                 ('Cargo:', report.job.jobName),
                 (
@@ -166,7 +167,7 @@ class _JobApplyPDFPageState extends State<JobApplyPDFPage> {
                       'Não informado'
                 ),
               ]),
-              pw.TableRow(children: [pw.SizedBox(height: 12)]),
+              pw.TableRow(children: [space]),
               getTableRow(
                 [
                   (
@@ -179,7 +180,7 @@ class _JobApplyPDFPageState extends State<JobApplyPDFPage> {
               )
             ],
           ),
-          pw.SizedBox(height: 12),
+          space
         ],
       ),
     );
@@ -212,9 +213,9 @@ class _JobApplyPDFPageState extends State<JobApplyPDFPage> {
                 pw.Padding(
                   padding: padding,
                   child: getText(
-                    text: 'Dados pessoais',
-                    bold: true,
-                  ),
+                      text: 'Dados pessoais',
+                      bold: true,
+                      style: const pw.TextStyle(fontSize: 14)),
                 )
               ],
             ),
