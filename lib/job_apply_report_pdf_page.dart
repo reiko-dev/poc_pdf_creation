@@ -24,6 +24,7 @@ class _JobApplyPDFPageState extends State<JobApplyPDFPage> {
   late final pw.TextStyle sectionTitleStyle;
   late final pw.TextStyle subSectionTitleStyle;
   late final pw.TextStyle bodyItalicStyle;
+  late final pw.TextStyle bodyStyle;
   late final pw.TextStyle bodyBoldtyle;
 
   bool isLoaded = false;
@@ -66,6 +67,10 @@ class _JobApplyPDFPageState extends State<JobApplyPDFPage> {
 
     bodyBoldtyle = pw.TextStyle(
       font: bold,
+      fontSize: 12,
+    );
+    bodyStyle = pw.TextStyle(
+      font: regular,
       fontSize: 12,
     );
 
@@ -123,19 +128,66 @@ class _JobApplyPDFPageState extends State<JobApplyPDFPage> {
               fontSize: 16,
             ),
           ),
+          pw.SizedBox(height: 12),
           pw.Table(
-            children: [getTableRow('Empresa', report.job.company.name!)],
+            columnWidths: {
+              0: const pw.FractionColumnWidth(.5),
+              1: const pw.FractionColumnWidth(.5),
+              2: const pw.FractionColumnWidth(.5),
+              3: const pw.FractionColumnWidth(.5),
+            },
+            children: [
+              getTableRow([
+                ('Empresa:', report.job.company.name!),
+                ('Data:', report.apply.createdAt.toString()),
+              ]),
+              getTableRow([
+                ('Cargo:', report.job.jobName),
+                (
+                  'Pretensão Salarial:',
+                  report.apply.report!.lastSalary?.toStringAsFixed(2) ??
+                      'Não informado'
+                ),
+              ]),
+              getTableRow(
+                [
+                  (
+                    'Último salário:',
+                    report.apply.report!.lastSalary?.toStringAsFixed(2) ??
+                        'Não informado',
+                  ),
+                ],
+                true,
+              )
+            ],
           ),
+          pw.SizedBox(height: 12),
         ],
       ),
     );
   }
 
-  pw.TableRow getTableRow(String key, String value, [bool upperCase = true]) {
-    return pw.TableRow(children: [
-      pw.Text(upperCase ? key.toUpperCase() : key),
-      pw.Text(upperCase ? value.toUpperCase() : value),
-    ]);
+  pw.TableRow getTableRow(
+    List<(String, String)> children, [
+    bool upperCase = true,
+  ]) {
+    final list = <pw.Widget>[];
+
+    for (var e in children) {
+      list.add(getText(e.$1, upperCase, true));
+      list.add(getText(e.$2, upperCase));
+    }
+
+    return pw.TableRow(children: list);
+  }
+
+  pw.Text getText(String text, [bool upperCase = true, bold = false]) {
+    text = text.trim();
+    return pw.Text(
+      upperCase ? text.toUpperCase() : text,
+      textAlign: pw.TextAlign.start,
+      style: bold ? bodyBoldtyle : bodyItalicStyle,
+    );
   }
 
   pw.Widget iconWithText(
