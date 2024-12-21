@@ -254,39 +254,6 @@ class _CurriculumPDFPageState extends State<CurriculumPDFPage> {
     );
   }
 
-  pw.Widget iconWithText(
-    pw.IconData iconData,
-    String text,
-  ) {
-    return pw.Padding(
-      padding: const pw.EdgeInsets.only(bottom: 6),
-      child: pw.Row(
-        crossAxisAlignment: pw.CrossAxisAlignment.center,
-        children: [
-          pw.DecoratedBox(
-            decoration: const pw.BoxDecoration(
-              color: PdfColor(0.2, .2, .2),
-            ),
-            child: pw.Padding(
-              padding: const pw.EdgeInsets.all(4),
-              child: pw.Icon(
-                iconData,
-                size: 16,
-                color: const PdfColor(1, 1, 1),
-                font: materialIconsFont,
-              ),
-            ),
-          ),
-          pw.SizedBox(width: 8),
-          pw.Text(
-            text,
-            style: bodyItalicStyle,
-          ),
-        ],
-      ),
-    );
-  }
-
   List<pw.Widget> addProfessionalExperiences(Curriculum curriculum) {
     final experiences = curriculum.professionalExperience;
 
