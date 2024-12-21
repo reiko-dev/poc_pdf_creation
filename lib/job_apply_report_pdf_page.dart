@@ -4,13 +4,20 @@ import 'package:flutter/material.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:poc_pdf_creation/core/date_time.dart';
+import 'package:poc_pdf_creation/curriculum/index.dart';
 import 'package:poc_pdf_creation/job_apply/user_job_application.dart';
+import 'package:poc_pdf_creation/models/index.dart';
 import 'package:printing/printing.dart';
 
 class JobApplyPDFPage extends StatefulWidget {
-  const JobApplyPDFPage({super.key, required this.report});
+  const JobApplyPDFPage({
+    super.key,
+    required this.report,
+    required this.curriculum,
+  });
 
   final UserJobApplication report;
+  final Curriculum curriculum;
 
   @override
   State<JobApplyPDFPage> createState() => _JobApplyPDFPageState();
@@ -82,7 +89,7 @@ class _JobApplyPDFPageState extends State<JobApplyPDFPage> {
     await _loadData();
     final doc = pw.Document();
 
-    addData(doc, jobApplyReport);
+    addData(doc, jobApplyReport, widget.curriculum);
 
     return doc.save();
   }
@@ -100,7 +107,11 @@ class _JobApplyPDFPageState extends State<JobApplyPDFPage> {
     }
   }
 
-  void addData(pw.Document doc, UserJobApplication report) {
+  void addData(
+    pw.Document doc,
+    UserJobApplication report,
+    Curriculum cu,
+  ) {
     doc.addPage(
       pw.MultiPage(
         maxPages: 50,
@@ -110,7 +121,7 @@ class _JobApplyPDFPageState extends State<JobApplyPDFPage> {
         build: (context) {
           return [
             firstSection(report: report),
-            personalDataSection(report: report),
+            personalDataSection(report: report, cu: cu),
           ];
         },
       ),
@@ -174,57 +185,72 @@ class _JobApplyPDFPageState extends State<JobApplyPDFPage> {
     );
   }
 
-  pw.Widget personalDataSection({required UserJobApplication report}) {
+  pw.Widget personalDataSection({
+    required UserJobApplication report,
+    required Curriculum cu,
+  }) {
+    const padding = pw.EdgeInsets.only(
+      top: 6,
+      bottom: 6,
+      left: 4,
+      right: 4,
+    );
+
     return pw.Padding(
       padding: const pw.EdgeInsets.only(top: 8),
       child: pw.Column(
         crossAxisAlignment: pw.CrossAxisAlignment.stretch,
         children: [
           pw.SizedBox(height: 12),
-          getText(
-            text: 'Dados pessoais',
-            bold: true,
+          pw.DecoratedBox(
+            decoration: pw.BoxDecoration(
+              border: pw.Border.all(),
+            ),
+            child: pw.Row(
+              mainAxisAlignment: pw.MainAxisAlignment.start,
+              children: [
+                pw.Padding(
+                  padding: padding,
+                  child: getText(
+                    text: 'Dados pessoais',
+                    bold: true,
+                  ),
+                )
+              ],
+            ),
           ),
           pw.Table(
             border: pw.TableBorder.all(),
             columnWidths: {
               0: const pw.FractionColumnWidth(.41),
               1: const pw.FractionColumnWidth(.6),
-              2: const pw.FractionColumnWidth(.35),
+              2: const pw.FractionColumnWidth(.37),
               3: const pw.FractionColumnWidth(.5),
-              4: const pw.FractionColumnWidth(.23),
-              5: const pw.FractionColumnWidth(.5),
+              4: const pw.FractionColumnWidth(.25),
+              5: const pw.FractionColumnWidth(.4),
             },
             children: [
               getTableRow(
                 [
-                  ('Nome:', report.job.company.name!),
-                  (
-                    'Sexo:',
-                    CustomDateFormatter.dateToBrExtensive(
-                        report.apply.createdAt)!
-                  ),
-                  (
-                    'Idade:',
-                    CustomDateFormatter.dateToBrExtensive(
-                        report.apply.createdAt)!
-                  ),
+                  ('Nome:', cu.name),
+                  ('Sexo:', cu.sex.label),
+                  ('Idade:', cu.ages?.toString() ?? 'Não informado'),
                 ],
-                padding: const pw.EdgeInsets.only(top: 24, bottom: 24, left: 4),
+                padding: padding,
               ),
-              getTableRow([
-                ('Endereço:', 'cur'),
-                (
-                  'Telefone:',
-                  CustomDateFormatter.dateToBrExtensive(report.apply.createdAt)!
-                ),
-              ]),
-              getTableRow([
-                (
-                  'E-mail:',
-                  CustomDateFormatter.dateToBrExtensive(report.apply.createdAt)!
-                ),
-              ]),
+              getTableRow(
+                [
+                  ('Endereço:', addressDescription(cu.address)),
+                  ('Telefone:', cu.phone),
+                ],
+                padding: padding,
+              ),
+              getTableRow(
+                [
+                  ('E-mail:', cu.email),
+                ],
+                padding: padding,
+              ),
             ],
           ),
           pw.SizedBox(height: 12),
@@ -241,13 +267,15 @@ class _JobApplyPDFPageState extends State<JobApplyPDFPage> {
     final list = <pw.Widget>[];
 
     for (var e in children) {
-      list.add(
-        pw.Padding(
-          padding: padding,
-          child: getText(text: e.$1, upperCase: upperCase, bold: true),
-        ),
-      );
-      list.add(getText(text: e.$2, upperCase: upperCase));
+      list.add(pw.Padding(
+        padding: padding,
+        child: getText(text: e.$1, upperCase: upperCase, bold: true),
+      ));
+
+      list.add(pw.Padding(
+        padding: padding,
+        child: getText(text: e.$2, upperCase: upperCase),
+      ));
     }
 
     return pw.TableRow(
@@ -256,13 +284,17 @@ class _JobApplyPDFPageState extends State<JobApplyPDFPage> {
     );
   }
 
-  pw.Text getText(
-      {required String text, bool upperCase = true, bool bold = false}) {
+  pw.Text getText({
+    required String text,
+    bool upperCase = true,
+    bool bold = false,
+    pw.TextStyle? style,
+  }) {
     text = text.trim();
     return pw.Text(
       upperCase ? text.toUpperCase() : text,
       textAlign: pw.TextAlign.start,
-      style: bold ? bodyBoldtyle : bodyStyle,
+      style: (bold ? bodyBoldtyle : bodyStyle).merge(style),
     );
   }
 
@@ -297,6 +329,21 @@ class _JobApplyPDFPageState extends State<JobApplyPDFPage> {
         ],
       ),
     );
+  }
+
+  String addressDescription(Address address) {
+    String value = '';
+    if (address.address != null) value += address.address!;
+
+    if (value.isNotEmpty) {
+      value += ', ';
+    }
+    value += address.addressNumber?.toString() ?? "";
+    value += '\n${address.city?.toString() ?? ""}';
+    value += ' - ${address.neighborhood?.toString() ?? ""}';
+    value += '\nCEP: ${address.cep?.toString() ?? ""}';
+
+    return value;
   }
 
   @override

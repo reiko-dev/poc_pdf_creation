@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
+import 'package:poc_pdf_creation/core/date_time.dart';
 import 'package:poc_pdf_creation/curriculum/index.dart';
 import 'package:poc_pdf_creation/models/index.dart';
 
@@ -225,6 +226,27 @@ class Curriculum {
 
   factory Curriculum.fromJson(String source) =>
       Curriculum.fromMap(json.decode(source) as Map<String, dynamic>);
+
+  int ageCalculator(DateTime dataNascimento) {
+    DateTime dataAtual = DateTime.now();
+    int idade = dataAtual.year - dataNascimento.year;
+
+    // Ajusta a idade se o aniversário ainda não passou
+    if (dataAtual.month < dataNascimento.month ||
+        (dataAtual.month == dataNascimento.month &&
+            dataAtual.day < dataNascimento.day)) {
+      idade--;
+    }
+
+    return idade;
+  }
+
+  int? get ages {
+    final date = CustomDateFormatter.brStringDateToDate(nascimento);
+    if (date == null) return null;
+
+    return ageCalculator(date);
+  }
 
   @override
   String toString() {

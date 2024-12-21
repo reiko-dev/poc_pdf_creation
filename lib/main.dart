@@ -7,6 +7,7 @@ import 'package:poc_pdf_creation/job_apply/job_apply_report.dart';
 import 'package:poc_pdf_creation/job_apply/job_apply_status/index.dart';
 import 'package:poc_pdf_creation/job_apply/random.dart';
 import 'package:poc_pdf_creation/job_apply/user_job_application.dart';
+import 'package:poc_pdf_creation/job_apply_report_pdf_page.dart';
 import 'package:poc_pdf_creation/models/index.dart';
 
 void main() {
@@ -40,7 +41,8 @@ class _MyAppState extends State<MyApp> {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: CurriculumPDFPage(
+      home: JobApplyPDFPage(
+        report: userJobApplications.first,
         curriculum: curriculums.first,
       ),
     );
