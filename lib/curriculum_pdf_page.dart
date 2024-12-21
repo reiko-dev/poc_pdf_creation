@@ -76,16 +76,18 @@ class _CurriculumPDFPageState extends State<CurriculumPDFPage> {
     return doc.save();
   }
 
-  int calculateAge(DateTime birthDate) {
+  String calculateAge(DateTime? birthDate) {
+    if (birthDate == null) return 'Não informado';
+
     final now = DateTime.now();
     final age = now.year - birthDate.year;
 
     // Handle leap years and months
     if (now.month < birthDate.month ||
         (now.month == birthDate.month && now.day < birthDate.day)) {
-      return age - 1;
+      return (age - 1).toString();
     } else {
-      return age;
+      return age.toString();
     }
   }
 
@@ -140,7 +142,7 @@ class _CurriculumPDFPageState extends State<CurriculumPDFPage> {
               calculateAge(
                 CustomDateFormatter.brStringDateToDate(
                   widget.curriculum.nascimento,
-                )!,
+                ),
               ).toString(),
               textAlign: pw.TextAlign.center,
               style: pw.TextStyle(font: regular, fontSize: 20),

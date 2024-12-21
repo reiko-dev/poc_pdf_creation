@@ -109,14 +109,15 @@ class _JobApplyPDFPageState extends State<JobApplyPDFPage> {
         mainAxisAlignment: pw.MainAxisAlignment.start,
         build: (context) {
           return [
-            section(report: report),
+            firstSection(report: report),
+            personalDataSection(report: report),
           ];
         },
       ),
     );
   }
 
-  pw.Widget section({required UserJobApplication report}) {
+  pw.Widget firstSection({required UserJobApplication report}) {
     return pw.Padding(
       padding: const pw.EdgeInsets.only(top: 8),
       child: pw.Column(
@@ -163,7 +164,7 @@ class _JobApplyPDFPageState extends State<JobApplyPDFPage> {
                         'Não informado',
                   ),
                 ],
-                true,
+                upperCase: true,
               )
             ],
           ),
@@ -173,15 +174,80 @@ class _JobApplyPDFPageState extends State<JobApplyPDFPage> {
     );
   }
 
+  pw.Widget personalDataSection({required UserJobApplication report}) {
+    return pw.Padding(
+      padding: const pw.EdgeInsets.only(top: 8),
+      child: pw.Column(
+        crossAxisAlignment: pw.CrossAxisAlignment.stretch,
+        children: [
+          pw.SizedBox(height: 12),
+          getText(
+            text: 'Dados pessoais',
+            bold: true,
+          ),
+          pw.Table(
+            border: pw.TableBorder.all(),
+            columnWidths: {
+              0: const pw.FractionColumnWidth(.41),
+              1: const pw.FractionColumnWidth(.6),
+              2: const pw.FractionColumnWidth(.35),
+              3: const pw.FractionColumnWidth(.5),
+              4: const pw.FractionColumnWidth(.23),
+              5: const pw.FractionColumnWidth(.5),
+            },
+            children: [
+              getTableRow(
+                [
+                  ('Nome:', report.job.company.name!),
+                  (
+                    'Sexo:',
+                    CustomDateFormatter.dateToBrExtensive(
+                        report.apply.createdAt)!
+                  ),
+                  (
+                    'Idade:',
+                    CustomDateFormatter.dateToBrExtensive(
+                        report.apply.createdAt)!
+                  ),
+                ],
+                padding: const pw.EdgeInsets.only(top: 24, bottom: 24, left: 4),
+              ),
+              getTableRow([
+                ('Endereço:', 'cur'),
+                (
+                  'Telefone:',
+                  CustomDateFormatter.dateToBrExtensive(report.apply.createdAt)!
+                ),
+              ]),
+              getTableRow([
+                (
+                  'E-mail:',
+                  CustomDateFormatter.dateToBrExtensive(report.apply.createdAt)!
+                ),
+              ]),
+            ],
+          ),
+          pw.SizedBox(height: 12),
+        ],
+      ),
+    );
+  }
+
   pw.TableRow getTableRow(
-    List<(String, String)> children, [
+    List<(String, String)> children, {
     bool upperCase = true,
-  ]) {
+    pw.EdgeInsets padding = pw.EdgeInsets.zero,
+  }) {
     final list = <pw.Widget>[];
 
     for (var e in children) {
-      list.add(getText(e.$1, upperCase, true));
-      list.add(getText(e.$2, upperCase));
+      list.add(
+        pw.Padding(
+          padding: padding,
+          child: getText(text: e.$1, upperCase: upperCase, bold: true),
+        ),
+      );
+      list.add(getText(text: e.$2, upperCase: upperCase));
     }
 
     return pw.TableRow(
@@ -190,12 +256,13 @@ class _JobApplyPDFPageState extends State<JobApplyPDFPage> {
     );
   }
 
-  pw.Text getText(String text, [bool upperCase = true, bold = false]) {
+  pw.Text getText(
+      {required String text, bool upperCase = true, bool bold = false}) {
     text = text.trim();
     return pw.Text(
       upperCase ? text.toUpperCase() : text,
       textAlign: pw.TextAlign.start,
-      style: bold ? bodyBoldtyle : bodyItalicStyle,
+      style: bold ? bodyBoldtyle : bodyStyle,
     );
   }
 
