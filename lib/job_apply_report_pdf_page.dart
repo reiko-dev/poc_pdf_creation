@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
+import 'package:poc_pdf_creation/core/date_time.dart';
 import 'package:poc_pdf_creation/job_apply/user_job_application.dart';
 import 'package:printing/printing.dart';
 
@@ -139,8 +140,12 @@ class _JobApplyPDFPageState extends State<JobApplyPDFPage> {
             children: [
               getTableRow([
                 ('Empresa:', report.job.company.name!),
-                ('Data:', report.apply.createdAt.toString()),
+                (
+                  'Data:',
+                  CustomDateFormatter.dateToBrExtensive(report.apply.createdAt)!
+                ),
               ]),
+              pw.TableRow(children: [pw.SizedBox(height: 12)]),
               getTableRow([
                 ('Cargo:', report.job.jobName),
                 (
@@ -149,6 +154,7 @@ class _JobApplyPDFPageState extends State<JobApplyPDFPage> {
                       'Não informado'
                 ),
               ]),
+              pw.TableRow(children: [pw.SizedBox(height: 12)]),
               getTableRow(
                 [
                   (
@@ -178,7 +184,10 @@ class _JobApplyPDFPageState extends State<JobApplyPDFPage> {
       list.add(getText(e.$2, upperCase));
     }
 
-    return pw.TableRow(children: list);
+    return pw.TableRow(
+      children: list,
+      verticalAlignment: pw.TableCellVerticalAlignment.middle,
+    );
   }
 
   pw.Text getText(String text, [bool upperCase = true, bold = false]) {
