@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:poc_pdf_creation/curriculum/index.dart';
-import 'package:poc_pdf_creation/curriculum_pdf_page.dart';
 import 'package:poc_pdf_creation/job_apply/job_apply.dart';
 import 'package:poc_pdf_creation/job_apply/job_apply_report.dart';
 import 'package:poc_pdf_creation/job_apply/job_apply_status/index.dart';
@@ -42,8 +41,9 @@ class _MyAppState extends State<MyApp> {
         useMaterial3: true,
       ),
       home: JobApplyPDFPage(
-        report: userJobApplications.first,
+        apply: userJobApplications.first,
         curriculum: curriculums.first,
+        analystName: Fake.name,
       ),
     );
   }
@@ -171,7 +171,7 @@ final userJobApplications = [
         ),
       ],
       report: JobApplyReport(
-        description: 'My description',
+        description: Fake.loremSentences(30),
         status: SuitableStatus.suitable,
         interviewDate: DateTime.now(),
       ),

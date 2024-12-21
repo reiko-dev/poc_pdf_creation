@@ -5,6 +5,7 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:poc_pdf_creation/core/date_time.dart';
 import 'package:poc_pdf_creation/curriculum/index.dart';
+import 'package:poc_pdf_creation/job_apply/job_apply_report.dart';
 import 'package:poc_pdf_creation/job_apply/user_job_application.dart';
 import 'package:poc_pdf_creation/models/index.dart';
 import 'package:printing/printing.dart';
@@ -12,12 +13,14 @@ import 'package:printing/printing.dart';
 class JobApplyPDFPage extends StatefulWidget {
   const JobApplyPDFPage({
     super.key,
-    required this.report,
+    required this.apply,
     required this.curriculum,
+    required this.analystName,
   });
 
-  final UserJobApplication report;
+  final UserJobApplication apply;
   final Curriculum curriculum;
+  final String analystName;
 
   @override
   State<JobApplyPDFPage> createState() => _JobApplyPDFPageState();
@@ -89,7 +92,7 @@ class _JobApplyPDFPageState extends State<JobApplyPDFPage> {
     await _loadData();
     final doc = pw.Document();
 
-    addData(doc, jobApplyReport, widget.curriculum);
+    addData(doc, jobApplyReport, widget.curriculum, widget.analystName);
 
     return doc.save();
   }
@@ -109,8 +112,9 @@ class _JobApplyPDFPageState extends State<JobApplyPDFPage> {
 
   void addData(
     pw.Document doc,
-    UserJobApplication report,
+    UserJobApplication apply,
     Curriculum cu,
+    String analystName,
   ) {
     doc.addPage(
       pw.MultiPage(
@@ -119,9 +123,97 @@ class _JobApplyPDFPageState extends State<JobApplyPDFPage> {
         crossAxisAlignment: pw.CrossAxisAlignment.start,
         mainAxisAlignment: pw.MainAxisAlignment.start,
         build: (context) {
+          final reportStatus = apply.apply.report?.status;
           return [
-            firstSection(report: report),
-            personalDataSection(report: report, cu: cu),
+            firstSection(report: apply),
+            personalDataSection(report: apply, cu: cu),
+            pw.SizedBox(height: 12),
+            pw.Text(
+              'Descrição: ${apply.apply.report!.description}',
+              style: bodyItalicStyle,
+            ),
+            pw.SizedBox(height: 16),
+            pw.Row(
+              mainAxisAlignment: pw.MainAxisAlignment.center,
+              children: [
+                pw.Text(
+                  'PARECER:',
+                  style: bodyStyle.copyWith(
+                    decoration: pw.TextDecoration.underline,
+                    decorationColor: PdfColors.black,
+                    color: PdfColors.black,
+                    // fontSize: 16,
+                  ),
+                ),
+                pw.Text(' ${apply.apply.report!.status.label}'),
+              ],
+            ),
+            pw.SizedBox(height: 12),
+            switch (apply.apply.report?.status) {
+              null || SuitableStatus.pending => pw.SizedBox.shrink(),
+              SuitableStatus.suitable ||
+              SuitableStatus.notSuitable =>
+                pw.DecoratedBox(
+                  decoration: pw.BoxDecoration(
+                    border: pw.Border.all(
+                      color: PdfColors.black,
+                      width: 1,
+                    ),
+                  ),
+                  child: pw.Padding(
+                    padding: const pw.EdgeInsets.all(8.0),
+                    child: pw.RichText(
+                      text: pw.TextSpan(
+                        text: widget.curriculum.name,
+                        style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+                        children: [
+                          pw.TextSpan(
+                            text: reportStatus == SuitableStatus.suitable
+                                ? ' está indicado(a) a ocupar a vaga de '
+                                : ' não está indicado(a) a ocupar a vaga de ',
+                            style: pw.TextStyle(
+                              fontWeight: pw.FontWeight.normal,
+                            ),
+                          ),
+                          pw.TextSpan(
+                            text: widget.apply.job.jobName,
+                            style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+                          ),
+                          pw.TextSpan(
+                            text: ' na empresa',
+                            style: pw.TextStyle(
+                              fontWeight: pw.FontWeight.normal,
+                            ),
+                          ),
+                          pw.TextSpan(
+                            text: ' ${widget.apply.job.company.name}',
+                            style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+                          ),
+                          pw.TextSpan(
+                            text: reportStatus == SuitableStatus.suitable
+                                ? ', pois apresenta características profissionais e pessoais aderentes às atividades a serem realizadas.'
+                                : ', pois não apresenta características profissionais e pessoais aderentes às atividades a serem realizadas.',
+                            style: pw.TextStyle(
+                              fontWeight: pw.FontWeight.normal,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+            },
+            pw.SizedBox(height: 24),
+            pw.Align(
+              alignment: pw.Alignment.center,
+              child: pw.Text(
+                analystName,
+                textAlign: pw.TextAlign.center,
+                style: bodyItalicStyle.copyWith(
+                  fontSize: 16,
+                ),
+              ),
+            )
           ];
         },
       ),
@@ -363,7 +455,7 @@ class _JobApplyPDFPageState extends State<JobApplyPDFPage> {
           child: CircularProgressIndicator(),
         ),
         build: (_) {
-          return _generatePdf(widget.report);
+          return _generatePdf(widget.apply);
         },
       ),
     );
