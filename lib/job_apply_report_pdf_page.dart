@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:poc_pdf_creation/core/date_time.dart';
@@ -37,6 +38,7 @@ class _JobApplyPDFPageState extends State<JobApplyPDFPage> {
   late final pw.TextStyle bodyItalicStyle;
   late final pw.TextStyle bodyStyle;
   late final pw.TextStyle bodyBoldtyle;
+  late final Uint8List _imageBytes;
 
   bool isLoaded = false;
 
@@ -59,6 +61,9 @@ class _JobApplyPDFPageState extends State<JobApplyPDFPage> {
           .then((value) {
         materialIconsFont = value;
       }),
+      rootBundle.load('assets/images/crielogo.png').then((r) {
+        _imageBytes = r.buffer.asUint8List();
+      })
     ]);
 
     sectionTitleStyle = pw.TextStyle(
@@ -133,22 +138,6 @@ class _JobApplyPDFPageState extends State<JobApplyPDFPage> {
               style: bodyItalicStyle,
             ),
             pw.SizedBox(height: 16),
-            pw.Row(
-              mainAxisAlignment: pw.MainAxisAlignment.center,
-              children: [
-                pw.Text(
-                  'PARECER:',
-                  style: bodyStyle.copyWith(
-                    decoration: pw.TextDecoration.underline,
-                    decorationColor: PdfColors.black,
-                    color: PdfColors.black,
-                    // fontSize: 16,
-                  ),
-                ),
-                pw.Text(' ${apply.apply.report!.status.label}'),
-              ],
-            ),
-            pw.SizedBox(height: 12),
             switch (apply.apply.report?.status) {
               null || SuitableStatus.pending => pw.SizedBox.shrink(),
               SuitableStatus.suitable ||
@@ -162,44 +151,64 @@ class _JobApplyPDFPageState extends State<JobApplyPDFPage> {
                   ),
                   child: pw.Padding(
                     padding: const pw.EdgeInsets.all(8.0),
-                    child: pw.RichText(
-                      text: pw.TextSpan(
-                        text: widget.curriculum.name,
-                        style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+                    child: pw.Column(children: [
+                      pw.Row(
+                        mainAxisAlignment: pw.MainAxisAlignment.center,
                         children: [
-                          pw.TextSpan(
-                            text: reportStatus == SuitableStatus.suitable
-                                ? ' está indicado(a) a ocupar a vaga de '
-                                : ' não está indicado(a) a ocupar a vaga de ',
-                            style: pw.TextStyle(
-                              fontWeight: pw.FontWeight.normal,
+                          pw.Text(
+                            'PARECER:',
+                            style: bodyBoldtyle.copyWith(
+                              decoration: pw.TextDecoration.underline,
+                              decorationColor: PdfColors.black,
+                              color: PdfColors.black,
+                              // fontSize: 16,
                             ),
                           ),
-                          pw.TextSpan(
-                            text: widget.apply.job.jobName,
-                            style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
-                          ),
-                          pw.TextSpan(
-                            text: ' na empresa',
-                            style: pw.TextStyle(
-                              fontWeight: pw.FontWeight.normal,
-                            ),
-                          ),
-                          pw.TextSpan(
-                            text: ' ${widget.apply.job.company.name}',
-                            style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
-                          ),
-                          pw.TextSpan(
-                            text: reportStatus == SuitableStatus.suitable
-                                ? ', pois apresenta características profissionais e pessoais aderentes às atividades a serem realizadas.'
-                                : ', pois não apresenta características profissionais e pessoais aderentes às atividades a serem realizadas.',
-                            style: pw.TextStyle(
-                              fontWeight: pw.FontWeight.normal,
-                            ),
-                          ),
+                          pw.Text(' ${apply.apply.report!.status.label}'),
                         ],
                       ),
-                    ),
+                      pw.SizedBox(height: 12),
+                      pw.RichText(
+                        text: pw.TextSpan(
+                          text: widget.curriculum.name,
+                          style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+                          children: [
+                            pw.TextSpan(
+                              text: reportStatus == SuitableStatus.suitable
+                                  ? ' está indicado(a) a ocupar a vaga de '
+                                  : ' não está indicado(a) a ocupar a vaga de ',
+                              style: pw.TextStyle(
+                                fontWeight: pw.FontWeight.normal,
+                              ),
+                            ),
+                            pw.TextSpan(
+                              text: widget.apply.job.jobName,
+                              style:
+                                  pw.TextStyle(fontWeight: pw.FontWeight.bold),
+                            ),
+                            pw.TextSpan(
+                              text: ' na empresa',
+                              style: pw.TextStyle(
+                                fontWeight: pw.FontWeight.normal,
+                              ),
+                            ),
+                            pw.TextSpan(
+                              text: ' ${widget.apply.job.company.name}',
+                              style:
+                                  pw.TextStyle(fontWeight: pw.FontWeight.bold),
+                            ),
+                            pw.TextSpan(
+                              text: reportStatus == SuitableStatus.suitable
+                                  ? ', pois apresenta características profissionais e pessoais aderentes às atividades a serem realizadas.'
+                                  : ', pois não apresenta características profissionais e pessoais aderentes às atividades a serem realizadas.',
+                              style: pw.TextStyle(
+                                fontWeight: pw.FontWeight.normal,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ]),
                   ),
                 ),
             },
@@ -222,59 +231,89 @@ class _JobApplyPDFPageState extends State<JobApplyPDFPage> {
 
   pw.Widget firstSection({required UserJobApplication report}) {
     final space = pw.SizedBox(height: 6);
-    return pw.Padding(
-      padding: const pw.EdgeInsets.only(top: 8),
-      child: pw.Column(
-        crossAxisAlignment: pw.CrossAxisAlignment.stretch,
-        children: [
-          pw.Text(
-            'Parecer da entrevista'.toUpperCase(),
-            textAlign: pw.TextAlign.center,
-            style: bodyBoldtyle.copyWith(
-              fontSize: 16,
-            ),
-          ),
-          pw.SizedBox(height: 12),
-          pw.Table(
-            columnWidths: {
-              0: const pw.FractionColumnWidth(.5),
-              1: const pw.FractionColumnWidth(.5),
-              2: const pw.FractionColumnWidth(.5),
-              3: const pw.FractionColumnWidth(.5),
-            },
+    return pw.Column(
+      crossAxisAlignment: pw.CrossAxisAlignment.start,
+      children: [
+        pw.SizedBox(
+          height: 40,
+          child: pw.Image(pw.MemoryImage(_imageBytes)),
+        ),
+        pw.Padding(
+          padding: const pw.EdgeInsets.only(top: 8),
+          child: pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.stretch,
             children: [
-              getTableRow([
-                ('Empresa:', report.job.company.name!),
-                (
-                  'Data:',
-                  CustomDateFormatter.dateToBrExtensive(report.apply.createdAt)!
+              pw.Text(
+                'Parecer da entrevista'.toUpperCase(),
+                textAlign: pw.TextAlign.center,
+                style: bodyBoldtyle.copyWith(
+                  fontSize: 16,
                 ),
-              ]),
-              pw.TableRow(children: [space]),
-              getTableRow([
-                ('Cargo:', report.job.jobName),
-                (
-                  'Pretensão Salarial:',
-                  report.apply.report!.lastSalary?.toStringAsFixed(2) ??
-                      'Não informado'
+              ),
+              pw.SizedBox(height: 12),
+              pw.DecoratedBox(
+                decoration: pw.BoxDecoration(
+                  border: pw.Border.all(),
                 ),
-              ]),
-              pw.TableRow(children: [space]),
-              getTableRow(
-                [
-                  (
-                    'Último salário:',
-                    report.apply.report!.lastSalary?.toStringAsFixed(2) ??
-                        'Não informado',
+                child: pw.Padding(
+                  padding: const pw.EdgeInsets.symmetric(
+                    horizontal: 4,
+                    vertical: 4,
                   ),
-                ],
-                upperCase: true,
-              )
+                  child: pw.Column(
+                    children: [
+                      getTableRow(
+                        [
+                          CustomTableRow(
+                            flexValue: 3,
+                            title: 'Empresa:',
+                            value: report.job.company.name!,
+                          ),
+                          CustomTableRow(
+                            flexValue: 2,
+                            title: 'Data:',
+                            value: CustomDateFormatter.dateToBrExtensive(
+                                report.apply.createdAt)!,
+                          ),
+                        ],
+                      ),
+                      pw.SizedBox(height: 8),
+                      getTableRow([
+                        CustomTableRow(
+                          flexValue: 1,
+                          title: 'Cargo:',
+                          value: report.job.jobName,
+                        ),
+                        CustomTableRow(
+                          flexValue: 1,
+                          title: 'Pretensão Salarial:',
+                          value: report.apply.report!.lastSalary
+                                  ?.toStringAsFixed(2) ??
+                              'Não informado',
+                        ),
+                      ]),
+                      pw.SizedBox(height: 8),
+                      getTableRow(
+                        [
+                          CustomTableRow(
+                            flexValue: 3,
+                            title: 'Último salário:',
+                            value: report.apply.report!.lastSalary
+                                    ?.toStringAsFixed(2) ??
+                                'Não informado',
+                          ),
+                        ],
+                        upperCase: true,
+                      ),
+                      space,
+                    ],
+                  ),
+                ),
+              ),
             ],
           ),
-          space
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -288,63 +327,61 @@ class _JobApplyPDFPageState extends State<JobApplyPDFPage> {
       left: 4,
       right: 4,
     );
+    final space = pw.SizedBox(height: 6);
 
     return pw.Padding(
       padding: const pw.EdgeInsets.only(top: 8),
       child: pw.Column(
         crossAxisAlignment: pw.CrossAxisAlignment.stretch,
         children: [
-          pw.SizedBox(height: 12),
+          space,
           pw.DecoratedBox(
             decoration: pw.BoxDecoration(
               border: pw.Border.all(),
             ),
-            child: pw.Row(
-              mainAxisAlignment: pw.MainAxisAlignment.start,
+            child: pw.Column(
               children: [
-                pw.Padding(
+                getTableRow(
+                  [
+                    CustomTableRow(
+                      flexValue: 1,
+                      title: 'Nome:',
+                      value: cu.name,
+                    ),
+                  ],
                   padding: padding,
-                  child: getText(
-                      text: 'Dados pessoais',
-                      bold: true,
-                      style: const pw.TextStyle(fontSize: 14)),
-                )
+                  title: 'Dados pessoais',
+                ),
+                getTableRow([
+                  CustomTableRow(
+                    flexValue: 1,
+                    title: 'Sexo:',
+                    value: cu.sex.label,
+                  ),
+                  CustomTableRow(
+                    flexValue: 1,
+                    title: 'Idade:',
+                    value: cu.ages?.toString() ?? 'Não informado',
+                  ),
+                ]),
+                getTableRow(
+                  [
+                    CustomTableRow(
+                      flexValue: 1,
+                      title: 'CPF:',
+                      value: cu.cpf,
+                    ),
+                    CustomTableRow(
+                      flexValue: 1,
+                      title: 'E-mail:',
+                      value: cu.email,
+                    ),
+                  ],
+                  padding: padding,
+                ),
+                space,
               ],
             ),
-          ),
-          pw.Table(
-            border: pw.TableBorder.all(),
-            columnWidths: {
-              0: const pw.FractionColumnWidth(.41),
-              1: const pw.FractionColumnWidth(.6),
-              2: const pw.FractionColumnWidth(.37),
-              3: const pw.FractionColumnWidth(.5),
-              4: const pw.FractionColumnWidth(.25),
-              5: const pw.FractionColumnWidth(.4),
-            },
-            children: [
-              getTableRow(
-                [
-                  ('Nome:', cu.name),
-                  ('Sexo:', cu.sex.label),
-                  ('Idade:', cu.ages?.toString() ?? 'Não informado'),
-                ],
-                padding: padding,
-              ),
-              getTableRow(
-                [
-                  ('Endereço:', addressDescription(cu.address)),
-                  ('Telefone:', cu.phone),
-                ],
-                padding: padding,
-              ),
-              getTableRow(
-                [
-                  ('E-mail:', cu.email),
-                ],
-                padding: padding,
-              ),
-            ],
           ),
           pw.SizedBox(height: 12),
         ],
@@ -352,28 +389,55 @@ class _JobApplyPDFPageState extends State<JobApplyPDFPage> {
     );
   }
 
-  pw.TableRow getTableRow(
-    List<(String, String)> children, {
+  pw.Widget getTableRow(
+    List<CustomTableRow> data, {
     bool upperCase = true,
     pw.EdgeInsets padding = pw.EdgeInsets.zero,
+    String? title,
   }) {
     final list = <pw.Widget>[];
 
-    for (var e in children) {
-      list.add(pw.Padding(
-        padding: padding,
-        child: getText(text: e.$1, upperCase: upperCase, bold: true),
-      ));
-
-      list.add(pw.Padding(
-        padding: padding,
-        child: getText(text: e.$2, upperCase: upperCase),
-      ));
+    for (var e in data) {
+      list.add(
+        pw.Flexible(
+          fit: pw.FlexFit.loose,
+          flex: e.flexValue,
+          child: pw.Row(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              pw.Padding(
+                padding: const pw.EdgeInsets.only(left: 4),
+                child: getText(text: e.title, upperCase: upperCase),
+              ),
+              pw.Flexible(
+                child: pw.Padding(
+                  padding: const pw.EdgeInsets.only(right: 4, left: 4),
+                  child:
+                      getText(text: e.value, upperCase: upperCase, bold: true),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
     }
 
-    return pw.TableRow(
-      children: list,
-      verticalAlignment: pw.TableCellVerticalAlignment.middle,
+    return pw.Column(
+      children: [
+        if (title != null)
+          pw.Padding(
+            padding: padding,
+            child: getText(
+              text: title,
+              bold: true,
+              style: const pw.TextStyle(fontSize: 14),
+            ),
+          ),
+        pw.Row(
+          crossAxisAlignment: pw.CrossAxisAlignment.start,
+          children: list,
+        ),
+      ],
     );
   }
 
@@ -460,4 +524,16 @@ class _JobApplyPDFPageState extends State<JobApplyPDFPage> {
       ),
     );
   }
+}
+
+class CustomTableRow {
+  final String title;
+  final String value;
+  final int flexValue;
+
+  CustomTableRow({
+    required this.title,
+    required this.value,
+    required this.flexValue,
+  });
 }
